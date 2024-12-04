@@ -1,130 +1,165 @@
-<!-- app/views/air_ambulance/index.blade.php -->
+@extends('layout.layout')
 
-@extends('layout/layout')
+@section('title', 'Air Ambulance Requests')
+
+@section('additional_css')
+<style>
+.card {
+    margin: 0 1rem;
+}
+
+.table th {
+    padding: 0.5rem;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+.table td {
+    padding: 0.5rem;
+    font-size: 0.9rem;
+    vertical-align: middle;
+}
+
+.table-text {
+    margin: 0;
+}
+
+.btn-action {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.status-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    font-weight: bold;
+}
+
+.status-pending {
+    background-color: #ffc107;
+    color: #333;
+}
+
+.status-approved {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.status-declined {
+    background-color: #dc3545;
+    color: #fff;
+}
+</style>
+@endsection
 
 @section('content')
-
-    <!-- Current air ambulance report -->
-
-    <div class="page-content d-flex align-items-center justify-content-center">
-
-        <div class="row w-100 mr-5 auth-page">
-            <div class="col-md-8 col-xl-8 mx-auto">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="btn-group mr-2 mb-sm-0 float-sm-right mt-1">
-                            <a href="air_ambulance/add" role="button"
-                               class="btn btn-sm btn-outline-info waves-light waves-effect"><i
-                                        class="ri-add-circle-line align-middle mr-2"></i>Request Air Ambulance</a>
-                        </div>
-
-                        <h4>Air Ambulance </h4>
-
-                        <table class="table table-striped mt-5" id="dataTable">
-                        @if (count($air_ambulances) > 0)
-
-                            <!-- Table Headings -->
-                                <thead>
-                                <th>Ref #</th>
-                                <th>View</th>
-                                <th>Date Captured</th>
-                                <th>Capturer</th>
-                                <th>Caller</th>
-                                <th>Aircraft Type</th>
-                                <th>Call Type</th>
-                                <th>Incident</th>
-                                <th>Referring Institution</th>
-                                <th>Receiving Institution</th>
-                                <th>Total Airtime</th>
-                                <th>Authority</th>
-                                </thead>
-
-                                <!-- Table Body -->
-                                <tbody>
-                                @foreach ($air_ambulances as $ambulance)
-                                    <tr>
-                                        <!-- Reference -->
-                                        <td class="table-text">
-                                            <div>{{ $ambulance->reference }}</div>
-                                        </td>
-
-                                        <td>
-                                            <div>
-                                                <a href="{!!URL::route('editAA',[$ambulance->id,
-                                                 'air_ambulance_id' => $ambulance->id])!!}"
-                                                   class="btn btn-sm btn-info mt-n2"><i
-                                                            class="ri-edit-2-line mr-1"></i>View</a>
-                                            </div>
-                                        </td>
-
-                                        <!-- Date Captured -->
-                                        <td class="table-text">
-                                            <div>{{ $ambulance->created_at }}</div>
-                                        </td>
-
-                                        <!-- Captured -->
-                                        <td class="table-text">
-                                            <?php
-                                                $user = \App\Models\User::find($ambulance->user_id);
-                                            ?>
-                                            <div>{{ $user->lastName }}</div>
-                                        </td>
-
-                                        <!-- Caller -->
-                                        <td class="table-text">
-                                            <div>{{ $ambulance->name }}</div>
-                                        </td>
-
-                                        <!-- Aircraft Type -->
-                                        <td class="table-text">
-                                            <div>{{ $ambulance->aircraft_type }}</div>
-                                        </td>
-
-                                        <!-- Call Type -->
-                                        <td class="table-text">
-                                            <div>{{ $ambulance->caller_type }}</div>
-                                        </td>
-
-                                        <!-- Incident -->
-                                        <td class="table-text">
-                                            <?php
-                                                $incident = \App\Models\Incident::find($ambulance->incident_id);
-                                            ?>
-                                            <div>{{ $incident->description }}</div>
-                                        </td>
-
-                                        <!-- Referring Institution -->
-                                        <td class="table-text">
-                                            <div>{{ $ambulance->referring_institution }}</div>
-                                        </td>
-
-                                        <!-- Receiving Institution -->
-                                        <td class="table-text">
-                                            <div>{{ $ambulance->receiving_institution }}</div>
-                                        </td>
-
-                                        <!-- Total Airtime -->
-                                        <td class="table-text">
-                                            <div>{{ $ambulance->total_airtime }}</div>
-                                        </td>
-
-                                        <!-- Authority -->
-                                        <td class="table-text">
-                                            <div>{{ $ambulance->status }}</div>
-                                        </td>
-
-                                    </tr>
-                                @endforeach
-                                </tbody>
-                            @else
-                                <div class="alert alert-info mt-5" role="alert">No air ambulance records available</div>
-                            @endif
-                        </table>
+<div class="container-fluid px-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3 class="mb-0">Air Ambulance Requests</h3>
+                        <a href="air_ambulance/add" class="btn btn-primary">
+                            <i class="fas fa-plus-circle me-2"></i>New Request
+                        </a>
                     </div>
+
+                    @if (count($air_ambulances) > 0)
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="dataTable">
+                                <thead>
+                                    <tr>
+                                        <th>Ref #</th>
+                                        <th>Date</th>
+                                        <th>Capturer</th>
+                                        <th>Caller</th>
+                                        <th>Aircraft</th>
+                                        <th>Call Type</th>
+                                        <th>Incident</th>
+                                        <th>From</th>
+                                        <th>To</th>
+                                        <th>Time</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($air_ambulances as $ambulance)
+                                        <tr>
+                                            <td>{{ $ambulance->reference }}</td>
+                                            <td>{{ $ambulance->created_at->format('Y-m-d H:i') }}</td>
+                                            <td>{{ \App\Models\User::find($ambulance->user_id)->lastName }}</td>
+                                            <td>{{ $ambulance->name }}</td>
+                                            <td>{{ $ambulance->aircraft_type }}</td>
+                                            <td>{{ $ambulance->caller_type }}</td>
+                                            <td>{{ \App\Models\Incident::find($ambulance->incident_id)->description }}</td>
+                                            <td>{{ $ambulance->referring_institution }}</td>
+                                            <td>{{ $ambulance->receiving_institution }}</td>
+                                            <td>{{ $ambulance->total_airtime }}</td>
+                                            <td>
+                                                <span class="status-badge status-{{ strtolower($ambulance->status) }}">
+                                                    {{ $ambulance->status }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <a href="{{ route('editAA', ['id' => $ambulance->id, 'air_ambulance_id' => $ambulance->id]) }}"
+                                                   class="btn btn-sm btn-primary btn-action">
+                                                    <i class="fas fa-eye me-1"></i> View
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        <div class="alert alert-info" role="alert">
+                            <i class="fas fa-info-circle me-2"></i> No air ambulance records available
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
     </div>
-
+</div>
 @endsection
 
+@section('additional_js')
+<script>
+$(document).ready(function() {
+    $('#dataTable').DataTable({
+        responsive: true,
+        dom: '<"d-flex justify-content-between align-items-center mb-3"Bf>rt<"d-flex justify-content-between align-items-center mt-3"lip>',
+        buttons: [
+            {
+                extend: 'excel',
+                text: '<i class="fas fa-file-excel me-1"></i> Excel',
+                className: 'btn btn-success btn-sm'
+            },
+            {
+                extend: 'pdf',
+                text: '<i class="fas fa-file-pdf me-1"></i> PDF',
+                className: 'btn btn-danger btn-sm'
+            },
+            {
+                extend: 'print',
+                text: '<i class="fas fa-print me-1"></i> Print',
+                className: 'btn btn-info btn-sm'
+            }
+        ],
+        pageLength: 15,
+        order: [[1, 'desc']], // Sort by date column
+        columnDefs: [
+            {
+                targets: 11, // Actions column
+                orderable: false
+            }
+        ]
+    });
+});
+</script>
+@endsection
